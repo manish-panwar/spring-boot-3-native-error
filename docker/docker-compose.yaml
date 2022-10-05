@@ -1,0 +1,74 @@
+version: '3.6'
+
+services:
+  pgdb:
+    image: artifactory.air-watch.com/dockerhub/postgres:13.2
+    container_name: ${POSTGRES_SERVICE_NAME}
+    env_file:
+      - ./.env
+    ports:
+      - ${POSTGRES_PORT}:5432
+    networks:
+      - db-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+
+  zookeeper:
+    image: ${ZOOKEEPER_IMAGE:-artifactory.air-watch.com/docker-local-ws1uem-dev-builds/uem-zookeeper-bitnami-photon:3.6.1}
+    container_name: ${ZOOKEEPER_SERVICE_NAME}
+    env_file:
+      - zookeeper.env
+    ports:
+      - ${ZK_EXPOSED_PORT}:2181
+    networks:
+      - kafka-network
+    environment:
+      - ZOO_SERVER_ID=0
+      - ZOO_HEAP_SIZE=100
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOO_4LW_COMMANDS_WHITELIST="*"
+      - ZOO_SERVERS='0.0.0.0:2888:3888'
+
+  kafka:
+    image: ${KAFKA_IMAGE:-artifactory.air-watch.com/docker-local-ws1uem-dev-builds/uem-kafka-bitnami-photon:2.8.1}
+    container_name: ${KAFKA_CONTAINER_NAME}
+    user: "1001"
+    ports:
+      - ${KAFKA_EXPOSED_PORT}:9092
+    networks:
+      - kafka-network
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_BROKER_ID=0
+      - KAFKA_CFG_NUM_PARTITIONS=3
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=${ZOOKEEPER_SERVICE_NAME}:2181
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INSIDE
+      - KAFKA_CFG_LISTENERS=INSIDE://0.0.0.0:9094,OUTSIDE://0.0.0.0:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INSIDE://${KAFKA_CONTAINER_NAME}:9094,OUTSIDE://localhost:9092
+      - JMX_PORT=9999
+    depends_on:
+      - zookeeper
+
+  redis:
+    image: artifactory.air-watch.com/docker-local-aw/bitnami/redis:5.0.14-debian-10-r173
+    container_name: some_proxy_service_redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - ./services/some-proxy-service/redis.conf.tpl:/opt/bitnami/redis/mounted-etc/redis.conf
+    ports:
+      - '6379:6379'
+    networks:
+      - db-network
+
+networks:
+  db-network:
+  kafka-network:
+
+volumes:
+  postgres-data:
+  zookeeper-data:
+  kafka-data:

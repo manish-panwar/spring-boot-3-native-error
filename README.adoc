@@ -1,0 +1,38 @@
+= Spring Boot 3 Native app reproducer
+
+This repository provides a reproducer to an error seen with Spring Boot 3 Native app.
+This example make use for following tooling:
+
+- Spring Boot 3 with Native compile.
+- GraalVM 22.2.r17-grl
+- OpenJDK 17.0.4-tem
+- Liquibase
+- Redis
+- Kafka
+- Postgres with R2DBC
+
+=== Environment setup
+
+Execute following command on you machine (this is only tested on Mac)
+
+```
+sh setup-native.sh
+```
+
+=== Steps to reproduce
+
+- Start dependencies by command `cd docker && docker-compose up`
+- Start Spring Boot app from IDE (I used IntelliJ) and app will start fine.
+- Hit endpoint `http://localhost:8080/hello` and you should get 200 response. Feel free to put a breakpoint in
+`DemoController` to see things in action.
+- Compile code into Native using command `make native`
+- Execute generated binary using `cd build/native/nativeCompile && ./demo-aot-native` and you should see below error.
+
+```
+Caused by: java.lang.IllegalArgumentException: Can't find '[toLeakAwareBuffer]' in io.micrometer.shaded.io.netty.buffer.AbstractByteBufAllocator
+        at io.micrometer.shaded.io.netty.util.ResourceLeakDetector.addExclusions(ResourceLeakDetector.java:576) ~[na:na]
+        at io.micrometer.shaded.io.netty.buffer.AbstractByteBufAllocator.<clinit>(AbstractByteBufAllocator.java:37) ~[demo-aot-native:1.7.5]
+        ... 97 common frames omitted
+
+```
+

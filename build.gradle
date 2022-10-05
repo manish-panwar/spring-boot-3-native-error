@@ -1,0 +1,65 @@
+plugins {
+	id 'org.springframework.boot' version '3.0.0-M5'
+	id 'io.spring.dependency-management' version '1.0.14.RELEASE'
+	id 'org.graalvm.buildtools.native' version '0.9.14'
+	id 'java'
+	id "org.liquibase.gradle" version "2.1.1"
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+apply plugin: "org.liquibase.gradle"
+
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+	maven { url 'https://repo.spring.io/snapshot' }
+	maven { url 'https://plugins.gradle.org/m2/' }
+}
+
+dependencies {
+	ext {
+		micrometerRigstryStatsdVersion = '1.7.5'
+		protobufVersion = '3.20.1'
+		jacksonVersion = '2.13.2'
+		jacksonDatabindVersion = '2.13.2.2'
+		lombokVersion = '1.18.22'
+		liquibaseVersion = '4.16.1'
+		r2dbcPostgreSqlVersion = '0.9.1.RELEASE'
+	}
+
+	implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'io.lettuce:lettuce-core'
+	implementation "org.liquibase:liquibase-core:${liquibaseVersion}"
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+	implementation 'org.postgresql:r2dbc-postgresql'
+	implementation "org.postgresql:r2dbc-postgresql:${r2dbcPostgreSqlVersion}"
+	implementation 'org.postgresql:postgresql:42.3.3'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	implementation 'org.springframework.kafka:spring-kafka'
+	implementation "io.micrometer:micrometer-registry-statsd:${micrometerRigstryStatsdVersion}"
+	implementation 'org.projectlombok:lombok:1.18.24'
+	implementation 'org.springframework.boot:spring-boot-autoconfigure'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation "org.springdoc:springdoc-openapi-webflux-ui:1.5.12"
+	implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
+	implementation "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+	implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
+
+	compileOnly "org.projectlombok:lombok:${lombokVersion}"
+	annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+	runtimeOnly 'com.fasterxml.jackson.module:jackson-module-scala_2.13:2.13.0'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
