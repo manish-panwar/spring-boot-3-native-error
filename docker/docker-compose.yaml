@@ -17,7 +17,7 @@ services:
       start_period: 10s
 
   zookeeper:
-    image: ${ZOOKEEPER_IMAGE:-artifactory.air-watch.com/docker-local-ws1uem-dev-builds/uem-zookeeper-bitnami-photon:3.6.1}
+    image: bitnami/zookeeper:3.7.1
     container_name: ${ZOOKEEPER_SERVICE_NAME}
     env_file:
       - zookeeper.env
@@ -30,10 +30,9 @@ services:
       - ZOO_HEAP_SIZE=100
       - ALLOW_ANONYMOUS_LOGIN=yes
       - ZOO_4LW_COMMANDS_WHITELIST="*"
-      - ZOO_SERVERS='0.0.0.0:2888:3888'
 
   kafka:
-    image: ${KAFKA_IMAGE:-artifactory.air-watch.com/docker-local-ws1uem-dev-builds/uem-kafka-bitnami-photon:2.8.1}
+    image: bitnami/kafka:3.0.2
     container_name: ${KAFKA_CONTAINER_NAME}
     user: "1001"
     ports:
