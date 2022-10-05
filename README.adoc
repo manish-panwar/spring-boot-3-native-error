@@ -3,17 +3,19 @@
 This repository provides a reproducer to an error seen with Spring Boot 3 Native app.
 This example make use for following tooling:
 
-- Spring Boot 3 with Native compile.
+- Spring Boot 3
 - GraalVM 22.2.r17-grl
 - OpenJDK 17.0.4-tem
 - Liquibase
 - Redis
 - Kafka
-- Postgres with R2DBC
+- Postgres and R2DBC
 
-=== Environment setup
+=== Pre-requisite
 
-Execute following command on you machine (this is only tested on Mac)
+- Install `make`
+- Java `java 17.0.4-tem`
+- GraalVM `java 22.2.r17-grl`
 
 ```
 sh setup-native.sh
